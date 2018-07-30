@@ -1,0 +1,393 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>4.2. simple_signal_proc &mdash; SIRIUS  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/autoapi.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/color_def.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/my_theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/color_def.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="prev" title="4.1. conf" href="../conf/index.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../Sirius.html" class="icon icon-home"> SIRIUS
+          
+
+          
+            
+            <img src="../../_static/logo_sirius.jpg" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../upsampling/intro_up.html">1. Upsampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../downsampling/intro_down.html">2. Downsampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../other/ref.html">3. References</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">4. Python examples API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../conf/index.html">4.1. <code class="docutils literal notranslate"><span class="pre">conf</span></code></a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">4.2. <code class="docutils literal notranslate"><span class="pre">simple_signal_proc</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-contents">4.2.1. Module Contents</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple_signal_proc.create_1D_rect">create_1D_rect</a></li>
+</ul>
+<ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple_signal_proc.sinc">sinc</a></li>
+</ul>
+<ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple_signal_proc.create_1D_sinc">create_1D_sinc</a></li>
+</ul>
+<ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple_signal_proc.create_1D_lanczos">create_1D_lanczos</a></li>
+</ul>
+<ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple_signal_proc.create_1D_mire">create_1D_mire</a></li>
+</ul>
+<ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple_signal_proc.create_1D_triangle_signal">create_1D_triangle_signal</a></li>
+</ul>
+<ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple_signal_proc.create_1D_cosine">create_1D_cosine</a></li>
+</ul>
+<ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple_signal_proc.create_1D_ramp">create_1D_ramp</a></li>
+</ul>
+<ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple_signal_proc.show_1D">show_1D</a></li>
+</ul>
+<ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple_signal_proc.mirror">mirror</a></li>
+</ul>
+<ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple_signal_proc.zero_pad">zero_pad</a></li>
+</ul>
+<ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple_signal_proc.periodize">periodize</a></li>
+</ul>
+<ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple_signal_proc.fft1D_zero_pad">fft1D_zero_pad</a></li>
+</ul>
+<ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple_signal_proc.fft1D_periodization">fft1D_periodization</a></li>
+</ul>
+<ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple_signal_proc.zoom_freq_zpd">zoom_freq_zpd</a></li>
+</ul>
+<ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple_signal_proc.zoom_freq_img_periodization">zoom_freq_img_periodization</a></li>
+</ul>
+<ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple_signal_proc.interp1d">interp1d</a></li>
+</ul>
+<ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple_signal_proc.zoom_freq_img_perAndSmooth">zoom_freq_img_perAndSmooth</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../Sirius.html">SIRIUS</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../Sirius.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">4. Sphinx AutoAPI Index</a> &raquo;</li>
+        
+      <li>4.2. <code class="docutils literal notranslate"><span class="pre">simple_signal_proc</span></code></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/autoapi/simple_signal_proc/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-simple_signal_proc">
+<span id="simple-signal-proc"></span><h1>4.2. <a class="reference internal" href="#module-simple_signal_proc" title="simple_signal_proc"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simple_signal_proc</span></code></a><a class="headerlink" href="#module-simple_signal_proc" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-contents">
+<h2>4.2.1. Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="simple_signal_proc.create_1D_rect">
+<code class="descclassname">simple_signal_proc.</code><code class="descname">create_1D_rect</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#simple_signal_proc.create_1D_rect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="simple_signal_proc.sinc">
+<code class="descclassname">simple_signal_proc.</code><code class="descname">sinc</code><span class="sig-paren">(</span><em>x</em>, <em>dtype=None</em><span class="sig-paren">)</span><a class="headerlink" href="#simple_signal_proc.sinc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="simple_signal_proc.create_1D_sinc">
+<code class="descclassname">simple_signal_proc.</code><code class="descname">create_1D_sinc</code><span class="sig-paren">(</span><em>n</em>, <em>step=1</em><span class="sig-paren">)</span><a class="headerlink" href="#simple_signal_proc.create_1D_sinc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="simple_signal_proc.create_1D_lanczos">
+<code class="descclassname">simple_signal_proc.</code><code class="descname">create_1D_lanczos</code><span class="sig-paren">(</span><em>n</em>, <em>a=3</em>, <em>step=1</em><span class="sig-paren">)</span><a class="headerlink" href="#simple_signal_proc.create_1D_lanczos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="simple_signal_proc.create_1D_mire">
+<code class="descclassname">simple_signal_proc.</code><code class="descname">create_1D_mire</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#simple_signal_proc.create_1D_mire" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="simple_signal_proc.create_1D_triangle_signal">
+<code class="descclassname">simple_signal_proc.</code><code class="descname">create_1D_triangle_signal</code><span class="sig-paren">(</span><em>n=4</em>, <em>step=1</em><span class="sig-paren">)</span><a class="headerlink" href="#simple_signal_proc.create_1D_triangle_signal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="simple_signal_proc.create_1D_cosine">
+<code class="descclassname">simple_signal_proc.</code><code class="descname">create_1D_cosine</code><span class="sig-paren">(</span><em>n=100</em>, <em>w=1</em><span class="sig-paren">)</span><a class="headerlink" href="#simple_signal_proc.create_1D_cosine" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="simple_signal_proc.create_1D_ramp">
+<code class="descclassname">simple_signal_proc.</code><code class="descname">create_1D_ramp</code><span class="sig-paren">(</span><em>n=100</em>, <em>step=1</em><span class="sig-paren">)</span><a class="headerlink" href="#simple_signal_proc.create_1D_ramp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="simple_signal_proc.show_1D">
+<code class="descclassname">simple_signal_proc.</code><code class="descname">show_1D</code><span class="sig-paren">(</span><em>signal</em>, <em>title=&quot;Figure&quot;</em><span class="sig-paren">)</span><a class="headerlink" href="#simple_signal_proc.show_1D" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="simple_signal_proc.mirror">
+<code class="descclassname">simple_signal_proc.</code><code class="descname">mirror</code><span class="sig-paren">(</span><em>s</em>, <em>margin_factor=2</em><span class="sig-paren">)</span><a class="headerlink" href="#simple_signal_proc.mirror" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="simple_signal_proc.zero_pad">
+<code class="descclassname">simple_signal_proc.</code><code class="descname">zero_pad</code><span class="sig-paren">(</span><em>s</em>, <em>margin_factor=2</em>, <em>dtype=None</em><span class="sig-paren">)</span><a class="headerlink" href="#simple_signal_proc.zero_pad" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="simple_signal_proc.periodize">
+<code class="descclassname">simple_signal_proc.</code><code class="descname">periodize</code><span class="sig-paren">(</span><em>s</em>, <em>margin_factor=2</em>, <em>dtype=None</em><span class="sig-paren">)</span><a class="headerlink" href="#simple_signal_proc.periodize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="simple_signal_proc.fft1D_zero_pad">
+<code class="descclassname">simple_signal_proc.</code><code class="descname">fft1D_zero_pad</code><span class="sig-paren">(</span><em>tf</em>, <em>zoom_factor=2</em><span class="sig-paren">)</span><a class="headerlink" href="#simple_signal_proc.fft1D_zero_pad" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="simple_signal_proc.fft1D_periodization">
+<code class="descclassname">simple_signal_proc.</code><code class="descname">fft1D_periodization</code><span class="sig-paren">(</span><em>tf</em>, <em>zoom_factor=2</em><span class="sig-paren">)</span><a class="headerlink" href="#simple_signal_proc.fft1D_periodization" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="simple_signal_proc.zoom_freq_zpd">
+<code class="descclassname">simple_signal_proc.</code><code class="descname">zoom_freq_zpd</code><span class="sig-paren">(</span><em>signal</em>, <em>zoom_factor=2</em><span class="sig-paren">)</span><a class="headerlink" href="#simple_signal_proc.zoom_freq_zpd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="simple_signal_proc.zoom_freq_img_periodization">
+<code class="descclassname">simple_signal_proc.</code><code class="descname">zoom_freq_img_periodization</code><span class="sig-paren">(</span><em>signal</em>, <em>zoom_factor=2</em>, <em>user_kernel=None</em><span class="sig-paren">)</span><a class="headerlink" href="#simple_signal_proc.zoom_freq_img_periodization" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="simple_signal_proc.interp1d">
+<code class="descclassname">simple_signal_proc.</code><code class="descname">interp1d</code><span class="sig-paren">(</span><em>signal</em>, <em>zoom_factor</em><span class="sig-paren">)</span><a class="headerlink" href="#simple_signal_proc.interp1d" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="simple_signal_proc.zoom_freq_img_perAndSmooth">
+<code class="descclassname">simple_signal_proc.</code><code class="descname">zoom_freq_img_perAndSmooth</code><span class="sig-paren">(</span><em>signal</em>, <em>zoom_factor</em><span class="sig-paren">)</span><a class="headerlink" href="#simple_signal_proc.zoom_freq_img_perAndSmooth" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../conf/index.html" class="btn btn-neutral" title="4.1. conf" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, CS.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            LANGUAGE:'en',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../_static/custom_admonition.js"></script>
+      <script type="text/javascript" src="../../_static/js/custom_admonition.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #ffffff;
+    }
+    /* Sidebar */
+    .wy-nav-side {
+      background: #076889;
+    }
+  </style>
+
+
+</body>
+</html>
