@@ -42,13 +42,17 @@ Image ZoomFilterImageToInputResolution(const Image& filter_image,
 
 void NormalizeFilterImage(Image& filter_image, int oversampling);
 
+<<<<<<< abc52e9f122be180fe9ca0901c49d269015c82ff
 Image FrequencyShift(const Image& filter_image, const Point& hot_point,
                      float shift_col, float shift_row);
 
+=======
+>>>>>>> recover translation dev
 Image CenterFilterImage(const Image& filter_image, const Point& hot_point);
 
 Filter Filter::Create(const std::string& image_path,
                       const ZoomRatio& zoom_ratio, const Point& hot_point,
+<<<<<<< abc52e9f122be180fe9ca0901c49d269015c82ff
                       PaddingType padding_type, bool normalize) {
     // load image
     auto filter_image = gdal::LoadImage(image_path);
@@ -59,14 +63,27 @@ Filter Filter::Create(const std::string& image_path,
 Filter Filter::Create(Image filter_image, const ZoomRatio& zoom_ratio,
                       const Point& hot_point, PaddingType padding_type,
                       bool normalize) {
+=======
+                      PaddingType padding_type, bool filter_normalize) {
+    // load image
+    auto filter_image = gdal::LoadImage(image_path);
+
+>>>>>>> recover translation dev
     if (hot_point.x < -1 || hot_point.x >= filter_image.size.col ||
         hot_point.y < -1 || hot_point.y >= filter_image.size.row) {
         LOG("filter", error, "Invalid hot point with coordinates {}, {}",
             hot_point.x, hot_point.y);
+<<<<<<< abc52e9f122be180fe9ca0901c49d269015c82ff
         throw sirius::Exception("Invalid hot point");
     }
 
     if (normalize) {
+=======
+        throw SiriusException("Invalid hot point");
+    }
+
+    if (filter_normalize) {
+>>>>>>> recover translation dev
         NormalizeFilterImage(filter_image, zoom_ratio.input_resolution());
     }
 
@@ -336,6 +353,7 @@ void NormalizeFilterImage(Image& filter_image, int oversampling) {
     }
 }
 
+<<<<<<< abc52e9f122be180fe9ca0901c49d269015c82ff
 Image FrequencyShift(const Image& filter_image, const Point& hot_point,
                      float shift_row, float shift_col) {
     LOG("filter", info, "apply frequency shift to the filter");
@@ -422,6 +440,20 @@ Image CenterFilterImage(const Image& filter_image, const Point& hot_point) {
     utils::FFTShift2D(shifted_values.get(), filter_image.size,
                       centered_filter.data.data());
 
+=======
+Image CenterFilterImage(const Image& filter_image, const Point& hot_point) {
+    LOG("filter", trace, "center filter image");
+
+    auto shifted_values =
+          fftw::CreateReal({filter_image.size.row, filter_image.size.col});
+    utils::IFFTShift2DUncentered(filter_image.data.data(), filter_image.size,
+                                 hot_point, shifted_values.get());
+    Image centered_filter(filter_image.size);
+    // centered FFTShift so filter's hot point remains centered
+    utils::FFTShift2D(shifted_values.get(), filter_image.size,
+                      centered_filter.data.data());
+
+>>>>>>> recover translation dev
     return centered_filter;
 }
 

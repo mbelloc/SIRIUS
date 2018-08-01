@@ -62,7 +62,6 @@ class Filter {
      * \param zoom_ratio ratio on which the filter must be applied
      * \param hot_point 2D coordinates of the filter's hot point
      * \param padding_type padding type
-     * \param normalize normalize filter
      *
      * \throw sirius::Exception if the filter image cannot be loaded
      */
@@ -84,7 +83,7 @@ class Filter {
     static Filter Create(Image filter_image, const ZoomRatio& zoom_ratio,
                          const Point& hot_point = filter_default_hot_point,
                          PaddingType padding_type = PaddingType::kMirrorPadding,
-                         bool normalize = false);
+                         bool filter_normalize = false);
 
     Filter() = default;
 
