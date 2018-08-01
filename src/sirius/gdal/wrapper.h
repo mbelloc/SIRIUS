@@ -87,7 +87,7 @@ GeoReference GetGeoReference(GDALDataset* dataset);
  * \return new geo reference
  */
 GeoReference ComputeShiftedGeoReference(GDALDataset* dataset, float row_shift,
-                                        float row_col);
+                                        float col_shift);
 
 }  // namespace gdal
 }  // namespace sirius

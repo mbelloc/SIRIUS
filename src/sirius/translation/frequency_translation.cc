@@ -35,7 +35,8 @@ namespace sirius {
 
 Image FrequencyTranslation::Shift(const Image& image, float shift_col,
                                   float shift_row) {
-    LOG("sirius", info, "apply translation to the image");
+    LOG("sirius", info, "Translation on x axis : {}, on y axis : {}", shift_col,
+        shift_row);
     Image shifted_image(image.size);
 
     utils::IFFTShift2D(image.data.data(), image.size,
@@ -87,7 +88,6 @@ Image FrequencyTranslation::Shift(const Image& image, float shift_col,
 
     shifted_image = fftw::IFFT(shifted_image.size, std::move(fft_image));
     Image unshifted_image(shifted_image.size);
-
     utils::FFTShift2D(shifted_image.data.data(), unshifted_image.size,
                       unshifted_image.data.data());
 
@@ -96,17 +96,15 @@ Image FrequencyTranslation::Shift(const Image& image, float shift_col,
     std::for_each(unshifted_image.data.begin(), unshifted_image.data.end(),
                   [pixel_count](double& pixel) { pixel /= pixel_count; });
 
-    unshifted_image = RemoveBorders(unshifted_image, std::ceil(shift_col),
-                                    std::ceil(shift_row));
-
-    return unshifted_image;
+    return RemoveBorders(unshifted_image, std::ceil(shift_col),
+                         std::ceil(shift_row));
 }
 
 Image FrequencyTranslation::RemoveBorders(const Image& image, int shift_col,
                                           int shift_row) {
     LOG("FrequencyTranslation", trace, "Remove borders");
     Image output_image(
-          {image.size.row - shift_row, image.size.col - shift_col});
+          {image.size.row - abs(shift_row), image.size.col - abs(shift_col)});
 
     int begin_row, begin_col, end_row, end_col;
     if (shift_row > 0) {
@@ -114,7 +112,7 @@ Image FrequencyTranslation::RemoveBorders(const Image& image, int shift_col,
         end_row = image.size.row;
     } else {
         begin_row = 0;
-        end_row = image.size.row - shift_row;
+        end_row = image.size.row + shift_row;
     }
 
     if (shift_col > 0) {
@@ -122,7 +120,7 @@ Image FrequencyTranslation::RemoveBorders(const Image& image, int shift_col,
         end_col = image.size.col;
     } else {
         begin_col = 0;
-        end_col = image.size.col - shift_col;
+        end_col = image.size.col + shift_col;
     }
 
     int begin_src = begin_row * image.size.col + begin_col;
