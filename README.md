@@ -138,7 +138,7 @@ Sirius X.Y.Z (...)
 Standalone tool to resample and filter images in the frequency domain
 
 Usage:
-  ./sirius [OPTION...] input-image output-image
+  ./src/sirius [OPTION...] input-image output-image
 
   -h, --help           Show help
   -v, --verbosity arg  Set verbosity level
@@ -154,6 +154,12 @@ Usage:
                                 filter is required to use this algorithm
       --upsample-zero-padding   Force zero padding as upsampling algorithm
                                 (default algorithm if no filter is provided)
+
+ translation options:
+      --row-trans arg  Translation on y axis (applied after resampling)
+                       (default: 0.0)
+      --col-trans arg  Translation on x axis (applied after resampling)
+                       (default: 0.0)
 
  filter options:
       --filter arg           Path to the filter image to apply to the source
@@ -236,6 +242,12 @@ Upsampling strategies can be forced with the following options:
 
 More details on algorithms in the [Theoretical Basis documentation][Sirius periodization].
 
+#### Translation options
+Translation parameters can be specified with options `--row-trans` and `--col-trans`.
+* `--row-trans ROW_TRANSLATION --col-trans COL_TRANSLATION` where ROW_TRANSLATION and COL_TRANSLATION are floating point translations respectively on x and y axis.
+By default these two options are set to 0.0 so no translation is applied.
+Note that any translation will result in a cropped image due to the removing of periodized borders. The cropped size on x and y axis is equivalent to the given parameters.
+
 #### Filter options
 
 A filter image path can be specified with the option `--filter`. This filter will be applied:
@@ -305,6 +317,18 @@ The following command line will zoom out `input/sentinel2_10m.tif` by 1/2 using 
          -r 1:2 \
          --filter data/filters/ZOOM_1_2.tif \
          data/input/sentinel2_10m.tif /tmp/sentinel2_10m_z1_2.tif
+```
+
+
+#### Translation
+The following command line will only apply a translation by 50.0 pixels on x and y axis to the given image.
+```sh
+./sirius -r 1:1 --row-trans 50.0 --col-trans 50.0 input/lena.jpg output/lena_shift50.tif
+```
+
+The following command line will apply a zoom and a translation by 57.5 pixels on x and y axis to the given image.
+```sh
+./sirius -r 2:1 --row-trans 57.5 --col-trans 57.5 --filter filters/ZOOM_2.tif input/lena.jpg output/lena_z2_shift57_5.tif
 ```
 
 ### Sirius library API
