@@ -38,6 +38,8 @@ set(SIRIUS_SRC
 
     sirius/image_streamer.h
     sirius/image_streamer.cc
+    sirius/shift_streamer.h
+    sirius/shift_streamer.cc
 
     # resampler
     sirius/resampler/frequency_resampler.h
@@ -78,6 +80,8 @@ set(SIRIUS_SRC
     sirius/gdal/input_stream.cc
     sirius/gdal/resampled_output_stream.h
     sirius/gdal/resampled_output_stream.cc
+    sirius/gdal/shifted_output_stream.h
+    sirius/gdal/shifted_output_stream.cc
     sirius/gdal/types.h
     sirius/gdal/wrapper.h
     sirius/gdal/wrapper.cc

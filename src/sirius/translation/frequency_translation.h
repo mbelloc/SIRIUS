@@ -40,10 +40,14 @@ class FrequencyTranslation {
     FrequencyTranslation(FrequencyTranslation&&) = default;
     FrequencyTranslation& operator=(FrequencyTranslation&&) = default;
 
-    Image Shift(const Image& image, float shift_col, float shift_row);
+    FrequencyTranslation(float row_shift, float col_shift);
+
+    Image Shift(const Image& image);
 
   private:
     Image RemoveBorders(const Image& image, int shift_col, int shift_row);
+
+    float row_shift_, col_shift_;
 };
 
 }  // end namespace sirius

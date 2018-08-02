@@ -33,6 +33,7 @@
 #include "sirius/exception.h"
 #include "sirius/frequency_resampler_factory.h"
 #include "sirius/image_streamer.h"
+#include "sirius/shift_streamer.h"
 #include "sirius/sirius.h"
 
 #include "sirius/gdal/wrapper.h"
@@ -93,10 +94,14 @@ void RunRegularMode(const sirius::IFrequencyResampler& frequency_resampler,
                     const sirius::Filter& filter,
                     const sirius::ZoomRatio& zoom_ratio,
                     const CliParameters& params);
+void RunRegularShiftMode(sirius::FrequencyTranslation& frequency_shifter,
+                         const CliParameters& params);
 void RunStreamMode(const sirius::IFrequencyResampler& frequency_resampler,
                    const sirius::Filter& filter,
                    const sirius::ZoomRatio& zoom_ratio,
                    const CliParameters& params);
+void RunStreamShiftMode(sirius::FrequencyTranslation& frequency_shift,
+                        const CliParameters& params);
 
 int main(int argc, const char* argv[]) {
     CliParameters params = GetCliParameters(argc, argv);
@@ -117,6 +122,18 @@ int main(int argc, const char* argv[]) {
     LOG("sirius", info, "Sirius {} - {}", sirius::kVersion, sirius::kGitCommit);
 
     try {
+        if (params.row_translation != 0.0 || params.col_translation != 0.0) {
+            sirius::FrequencyTranslation freq_trans(params.row_translation,
+                                                    params.col_translation);
+            if (!params.stream_mode) {
+                RunRegularShiftMode(freq_trans, params);
+                return 0;
+            } else {
+                RunStreamShiftMode(freq_trans, params);
+            }
+        }
+
+        LOG("sirius", info, "Resampling mode");
         auto zoom_ratio = sirius::ZoomRatio::Create(params.resampling_ratio);
         LOG("sirius", info, "resampling ratio: {}:{}",
             zoom_ratio.input_resolution(), zoom_ratio.output_resolution());
@@ -185,6 +202,7 @@ int main(int argc, const char* argv[]) {
         } else {
             RunStreamMode(*frequency_resampler, filter, zoom_ratio, params);
         }
+
         if (params.row_translation != 0.0 || params.col_translation != 0.0) {
             auto output_image =
                   sirius::gdal::LoadImage(params.output_image_path);
@@ -224,8 +242,29 @@ void RunRegularMode(const sirius::IFrequencyResampler& frequency_resampler,
     LOG("sirius", info, "resampled image '{}' ({}x{})",
         params.output_image_path, resampled_image.size.row,
         resampled_image.size.col);
+
     sirius::gdal::SaveImage(resampled_image, params.output_image_path,
                             resampled_geo_ref);
+}
+
+void RunRegularShiftMode(sirius::FrequencyTranslation& frequency_shifter,
+                         const CliParameters& params) {
+    LOG("sirius", info, "regular shift mode");
+    auto input_image = sirius::gdal::LoadImage(params.input_image_path);
+    LOG("sirius", info, "input image '{}' ({}x{})", params.input_image_path,
+        input_image.size.row, input_image.size.col);
+
+    auto shifted_geo_ref = sirius::gdal::ComputeShiftedGeoReference(
+          params.input_image_path, params.row_translation,
+          params.col_translation);
+
+    auto shifted_image = frequency_shifter.Shift(input_image);
+
+    LOG("sirius", info, "shifted image '{}' ({}x{})", params.output_image_path,
+        shifted_image.size.row, shifted_image.size.col);
+
+    sirius::gdal::SaveImage(shifted_image, params.output_image_path,
+                            shifted_geo_ref);
 }
 
 void RunStreamMode(const sirius::IFrequencyResampler& frequency_resampler,
@@ -260,6 +299,24 @@ void RunStreamMode(const sirius::IFrequencyResampler& frequency_resampler,
           params.input_image_path, params.output_image_path, stream_block_size,
           zoom_ratio, filter.Metadata(), max_parallel_workers);
     streamer.Stream(frequency_resampler, filter);
+}
+
+void RunStreamShiftMode(sirius::FrequencyTranslation& frequency_shifter,
+                        const CliParameters& params) {
+    LOG("sirius", info, "streaming shift mode");
+    unsigned int max_parallel_workers =
+          std::max(std::min(params.stream_parallel_workers,
+                            std::thread::hardware_concurrency()),
+                   1u);
+    auto stream_block_size = params.GetStreamBlockSize();
+    stream_block_size.row += std::ceil(abs(params.row_translation));
+    stream_block_size.col += std::ceil(abs(params.col_translation));
+
+    sirius::ShiftStreamer streamer(
+          params.input_image_path, params.output_image_path, stream_block_size,
+          params.row_translation, params.col_translation, max_parallel_workers);
+
+    streamer.Stream(frequency_shifter);
 }
 
 CliParameters GetCliParameters(int argc, const char* argv[]) {

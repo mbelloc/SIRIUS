@@ -44,10 +44,10 @@ TEST_CASE("frequency resampler - classic - periodization zoom", "[sirius]") {
     // output
     sirius::Image output;
 
-    sirius::FrequencyTranslation freq_trans;
+    sirius::FrequencyTranslation freq_trans(50.0, 50.0);
 
     SECTION("lena - positive translation on both axis") {
-        REQUIRE_NOTHROW(output = freq_trans.Shift(lena_image, 50.0, 50.0));
+        REQUIRE_NOTHROW(output = freq_trans.Shift(lena_image));
         REQUIRE(output.data.size() > 0);
         REQUIRE(output.size.row == lena_image.size.row - 50.0);
         REQUIRE(output.size.col == lena_image.size.col - 50.0);
@@ -56,8 +56,9 @@ TEST_CASE("frequency resampler - classic - periodization zoom", "[sirius]") {
             output.size.col);
     }
 
+    freq_trans = sirius::FrequencyTranslation(0.0, 50.0);
     SECTION("lena - positive translation on x axis") {
-        REQUIRE_NOTHROW(output = freq_trans.Shift(lena_image, 50.0, 0.0));
+        REQUIRE_NOTHROW(output = freq_trans.Shift(lena_image));
         REQUIRE(output.data.size() > 0);
         REQUIRE(output.size.row == lena_image.size.row);
         REQUIRE(output.size.col == lena_image.size.col - 50.0);
@@ -67,8 +68,9 @@ TEST_CASE("frequency resampler - classic - periodization zoom", "[sirius]") {
             output.size.col);
     }
 
+    freq_trans = sirius::FrequencyTranslation(50.0, 0.0);
     SECTION("lena - positive translation on y axis") {
-        REQUIRE_NOTHROW(output = freq_trans.Shift(lena_image, 0.0, 50.0));
+        REQUIRE_NOTHROW(output = freq_trans.Shift(lena_image));
         REQUIRE(output.data.size() > 0);
         REQUIRE(output.size.row == lena_image.size.row - 50.0);
         REQUIRE(output.size.col == lena_image.size.col);
@@ -78,8 +80,9 @@ TEST_CASE("frequency resampler - classic - periodization zoom", "[sirius]") {
             output.size.col);
     }
 
+    freq_trans = sirius::FrequencyTranslation(0.0, -50.0);
     SECTION("lena - negative translation on x axis") {
-        REQUIRE_NOTHROW(output = freq_trans.Shift(lena_image, -50.0, 0.0));
+        REQUIRE_NOTHROW(output = freq_trans.Shift(lena_image));
         REQUIRE(output.data.size() > 0);
         REQUIRE(output.size.row == lena_image.size.row);
         REQUIRE(output.size.col == lena_image.size.col - 50.0);
@@ -90,8 +93,9 @@ TEST_CASE("frequency resampler - classic - periodization zoom", "[sirius]") {
             output.size.col);
     }
 
+    freq_trans = sirius::FrequencyTranslation(-50.0, 0.0);
     SECTION("lena - negative translation on y axis") {
-        REQUIRE_NOTHROW(output = freq_trans.Shift(lena_image, 0.0, -50.0));
+        REQUIRE_NOTHROW(output = freq_trans.Shift(lena_image));
         REQUIRE(output.data.size() > 0);
         REQUIRE(output.size.row == lena_image.size.row - 50.0);
         REQUIRE(output.size.col == lena_image.size.col);
@@ -102,8 +106,9 @@ TEST_CASE("frequency resampler - classic - periodization zoom", "[sirius]") {
             output.size.col);
     }
 
+    freq_trans = sirius::FrequencyTranslation(-50.0, -50.0);
     SECTION("lena - negative translation on both axis") {
-        REQUIRE_NOTHROW(output = freq_trans.Shift(lena_image, -50.0, -50.0));
+        REQUIRE_NOTHROW(output = freq_trans.Shift(lena_image));
         REQUIRE(output.data.size() > 0);
         REQUIRE(output.size.row == lena_image.size.row - 50.0);
         REQUIRE(output.size.col == lena_image.size.col - 50.0);
@@ -112,8 +117,9 @@ TEST_CASE("frequency resampler - classic - periodization zoom", "[sirius]") {
             output.size.col);
     }
 
+    freq_trans = sirius::FrequencyTranslation(-50.0, 50.0);
     SECTION("lena - mixed translation on both axis") {
-        REQUIRE_NOTHROW(output = freq_trans.Shift(lena_image, -50.0, 50.0));
+        REQUIRE_NOTHROW(output = freq_trans.Shift(lena_image));
         REQUIRE(output.data.size() > 0);
         REQUIRE(output.size.row == lena_image.size.row - 50.0);
         REQUIRE(output.size.col == lena_image.size.col - 50.0);
@@ -122,13 +128,25 @@ TEST_CASE("frequency resampler - classic - periodization zoom", "[sirius]") {
             output.size.col);
     }
 
+    freq_trans = sirius::FrequencyTranslation(0.0, 0.0);
     SECTION("lena - no translation") {
-        REQUIRE_NOTHROW(output = freq_trans.Shift(lena_image, 0.0, 0.0));
+        REQUIRE_NOTHROW(output = freq_trans.Shift(lena_image));
         REQUIRE(output.data.size() > 0);
         REQUIRE(output.size.row == lena_image.size.row);
         REQUIRE(output.size.col == lena_image.size.col);
         REQUIRE(std::round(output.data[500]) ==
                 std::round(lena_image.data[500]));
+
+        LOG("tests", debug, "output size: {}, {}", output.size.row,
+            output.size.col);
+    }
+
+    freq_trans = sirius::FrequencyTranslation(50.72, -50.72);
+    SECTION("lena - sub pixel translation") {
+        REQUIRE_NOTHROW(output = freq_trans.Shift(lena_image));
+        REQUIRE(output.data.size() > 0);
+        REQUIRE(output.size.row == lena_image.size.row - 51);
+        REQUIRE(output.size.col == lena_image.size.col - 51);
 
         LOG("tests", debug, "output size: {}, {}", output.size.row,
             output.size.col);
