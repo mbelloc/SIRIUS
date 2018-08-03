@@ -130,6 +130,7 @@ int main(int argc, const char* argv[]) {
                 return 0;
             } else {
                 RunStreamShiftMode(freq_trans, params);
+                return 0;
             }
         }
 
@@ -363,9 +364,9 @@ CliParameters GetCliParameters(int argc, const char* argv[]) {
           cxxopts::value(params.upsample_zero_padding));
 
     options.add_options("translation")
-        ("row-trans", "Translation on y axis (applied after resampling)", 
+        ("row-trans", "Translation on y axis", 
           cxxopts::value(params.row_translation)->default_value("0.0"))
-        ("col-trans", "Translation on x axis (applied after resampling)", 
+        ("col-trans", "Translation on x axis", 
           cxxopts::value(params.col_translation)->default_value("0.0"));
 
     options.add_options("filter")

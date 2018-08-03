@@ -24,7 +24,7 @@
 
 #include "sirius/translation/frequency_translation.h"
 
-#include "sirius/gdal/input_stream.h"
+#include "sirius/gdal/shifted_input_stream.h"
 #include "sirius/gdal/shifted_output_stream.h"
 #include "sirius/gdal/wrapper.h"
 
@@ -37,7 +37,7 @@ class ShiftStreamer {
   public:
     /**
      * \brief Instanciate an image streamer which will stream input image, apply
-     *   a resampling transformation and write the result into the output image
+     *   a translation and write the result into the output image
      * \param input_path input image path
      * \param output_path output image path
      * \param block_size stream block size
@@ -51,7 +51,7 @@ class ShiftStreamer {
                   unsigned int max_parallel_workers);
 
     /**
-     * \brief Stream the input image, compute the resampling and stream
+     * \brief Stream the input image, compute the translation and stream
      *   output data
      * \param frequency_shifter requested frequency shifter to apply on
      *   stream block
@@ -62,7 +62,7 @@ class ShiftStreamer {
     /**
      * \brief Stream image in monothreading mode
      *
-     * Read a block, compute the transmation and write the output in the output
+     * Read a block, compute the translation and write the output in the output
      *   file
      *
      * \param frequency_shifter frequency translation to apply on stream block
@@ -85,7 +85,7 @@ class ShiftStreamer {
   private:
     unsigned int max_parallel_workers_;
     Size block_size_;
-    gdal::InputStream input_stream_;
+    gdal::ShiftedInputStream input_stream_;
     gdal::ShiftedOutputStream output_stream_;
 };
 

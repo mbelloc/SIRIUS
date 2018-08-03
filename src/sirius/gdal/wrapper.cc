@@ -212,10 +212,9 @@ std::vector<double> ComputeShiftedGeoTransform(GDALDataset* dataset,
             "GDAL error: {} - could not read input geo transform");
         return geo_transform;
     }
-    if (geo_transform[0] != 0.0 && geo_transform[3] != 0) {
-        geo_transform[0] += row_shift * geo_transform[1];
-        geo_transform[3] += col_shift * geo_transform[5];
-    }
+
+    geo_transform[0] += row_shift * geo_transform[1];
+    geo_transform[3] += col_shift * geo_transform[5];
 
     return geo_transform;
 }

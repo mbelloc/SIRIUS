@@ -31,16 +31,17 @@ namespace gdal {
 
 ShiftedOutputStream::ShiftedOutputStream(const std::string& input_path,
                                          const std::string& output_path,
-                                         float row_shift, float col_shift) {
+                                         float row_shift, float col_shift)
+    : row_shift_(row_shift), col_shift_(col_shift) {
     auto input_dataset = gdal::LoadDataset(input_path);
 
-    int output_h =
-          std::ceil(input_dataset->GetRasterYSize() - std::ceil(row_shift));
-    int output_w =
-          std::ceil(input_dataset->GetRasterXSize() - std::ceil(col_shift));
+    int output_h = std::ceil(input_dataset->GetRasterYSize() -
+                             std::ceil(abs(row_shift_)));
+    int output_w = std::ceil(input_dataset->GetRasterXSize() -
+                             std::ceil(abs(col_shift_)));
 
     auto geo_ref =
-          gdal::ComputeShiftedGeoReference(input_path, row_shift, col_shift);
+          gdal::ComputeShiftedGeoReference(input_path, row_shift_, col_shift_);
     output_dataset_ =
           gdal::CreateDataset(output_path, output_w, output_h, 1, geo_ref);
     LOG("shifted_output_stream", info, "shifted image '{}' ({}x{})",

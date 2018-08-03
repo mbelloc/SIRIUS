@@ -33,7 +33,7 @@ namespace sirius {
 namespace gdal {
 
 /**
- * \brief Write a resampled image by block
+ * \brief Write a shifted image by block
  */
 class ShiftedOutputStream {
   public:
@@ -48,7 +48,7 @@ class ShiftedOutputStream {
     ShiftedOutputStream& operator=(ShiftedOutputStream&&) = delete;
 
     /**
-     * \brief Write a zoomed block in the output file
+     * \brief Write a shifted block in the output file
      * \param block block to write
      * \param ec error code if operation failed
      */
@@ -56,6 +56,7 @@ class ShiftedOutputStream {
 
   private:
     gdal::DatasetUPtr output_dataset_;
+    float row_shift_, col_shift_;
 };
 
 }  // namespace gdal

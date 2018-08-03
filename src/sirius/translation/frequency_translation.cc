@@ -37,8 +37,19 @@ FrequencyTranslation::FrequencyTranslation(float row_shift, float col_shift)
     : row_shift_(row_shift), col_shift_(col_shift) {}
 
 Image FrequencyTranslation::Shift(const Image& image) {
-    LOG("sirius", trace, "Translation on x axis : {}, on y axis : {}",
-        col_shift_, row_shift_);
+    if (row_shift_ >= image.size.row || col_shift_ >= image.size.col ||
+        row_shift_ <= -image.size.row || col_shift_ <= -image.size.col) {
+        LOG("sirius", warn,
+            "Desired shift x:{}, y:{} is greater than image size, this shift "
+            "will be applied instead x:{}, y:{}",
+            col_shift_, row_shift_,
+            col_shift_ / static_cast<float>(image.size.col),
+            row_shift_ / static_cast<float>(image.size.row));
+        row_shift_ /= static_cast<float>(image.size.row);
+        col_shift_ /= static_cast<float>(image.size.col);
+    }
+
+    LOG("sirius", trace, "Translation x:{}, y:{}", col_shift_, row_shift_);
 
     float reduced_x_shift = col_shift_ - static_cast<int>(col_shift_);
     float reduced_y_shift = row_shift_ - static_cast<int>(row_shift_);
@@ -47,7 +58,6 @@ Image FrequencyTranslation::Shift(const Image& image) {
 
     // sub_pixel translation required
     if (reduced_x_shift != 0.0 || reduced_y_shift != 0.0) {
-        LOG("FrequencyTranslation", trace, "sub pixel shift");
         Image shifted_image(image.size);
 
         utils::IFFTShift2D(image.data.data(), image.size,
@@ -118,7 +128,6 @@ Image FrequencyTranslation::Shift(const Image& image) {
         std::for_each(output_image.data.begin(), output_image.data.end(),
                       [pixel_count](double& pixel) { pixel /= pixel_count; });
     } else {
-        LOG("FrequencyTranslation", trace, "no sub pixel shift");
         output_image = image;
     }
 
@@ -144,7 +153,8 @@ Image FrequencyTranslation::Shift(const Image& image) {
 
 Image FrequencyTranslation::RemoveBorders(const Image& image, int row_shift,
                                           int col_shift) {
-    LOG("FrequencyTranslation", trace, "Remove borders");
+    LOG("FrequencyTranslation", trace, "Remove borders x:{}, y:{}", col_shift,
+        row_shift);
 
     if (col_shift == 0 && row_shift == 0) {
         return image;

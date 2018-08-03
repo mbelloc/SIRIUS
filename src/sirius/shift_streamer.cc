@@ -38,8 +38,7 @@ ShiftStreamer::ShiftStreamer(const std::string& input_path,
                              float col_shift, unsigned int max_parallel_workers)
     : max_parallel_workers_(max_parallel_workers),
       block_size_(block_size),
-      input_stream_(input_path, block_size, {0, 0},
-                    {PaddingType::kZeroPadding}),
+      input_stream_(input_path, block_size, row_shift, col_shift),
       output_stream_(input_path, output_path, row_shift, col_shift) {}
 
 void ShiftStreamer::Stream(FrequencyTranslation& frequency_shifter) {
@@ -59,7 +58,7 @@ void ShiftStreamer::RunMonothreadStream(
         std::error_code read_ec;
         auto block = input_stream_.Read(read_ec);
         if (read_ec) {
-            LOG("image_streamer", error, "error while reading block: {}",
+            LOG("shift_streamer", error, "error while reading block: {}",
                 read_ec.message());
             break;
         }
@@ -69,7 +68,7 @@ void ShiftStreamer::RunMonothreadStream(
         std::error_code write_ec;
         output_stream_.Write(std::move(block), write_ec);
         if (write_ec) {
-            LOG("image_streamer", error, "error while writing block: {}",
+            LOG("shift_streamer", error, "error while writing block: {}",
                 write_ec.message());
             break;
         }

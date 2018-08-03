@@ -78,6 +78,8 @@ set(SIRIUS_SRC
     sirius/gdal/stream_block.h
     sirius/gdal/input_stream.h
     sirius/gdal/input_stream.cc
+    sirius/gdal/shifted_input_stream.h
+    sirius/gdal/shifted_input_stream.cc
     sirius/gdal/resampled_output_stream.h
     sirius/gdal/resampled_output_stream.cc
     sirius/gdal/shifted_output_stream.h
