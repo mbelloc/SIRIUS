@@ -205,21 +205,7 @@ int main(int argc, const char* argv[]) {
         } else {
             RunStreamMode(*frequency_resampler, filter, zoom_ratio, params);
         }
-
-        if (params.row_translation != 0.0 || params.col_translation != 0.0) {
-            auto output_image =
-                  sirius::gdal::LoadImage(params.output_image_path);
-            sirius::FrequencyTranslation freq_trans;
-            output_image = freq_trans.Shift(
-                  output_image, params.col_translation, params.row_translation);
-            auto dataset = sirius::gdal::LoadDataset(params.output_image_path);
-            auto geo_ref = sirius::gdal::ComputeShiftedGeoReference(
-                  dataset.get(), params.row_translation,
-                  params.col_translation);
-            sirius::gdal::SaveImage(output_image, params.output_image_path,
-                                    geo_ref);
-        }
-    } catch (const sirius::SiriusException& e) {
+    } catch (const sirius::Exception& e) {
         std::cerr << "sirius: exception while computing resampling: "
                   << e.what() << std::endl;
         return 1;
