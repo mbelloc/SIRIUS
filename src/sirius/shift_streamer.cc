@@ -41,7 +41,7 @@ ShiftStreamer::ShiftStreamer(const std::string& input_path,
       input_stream_(input_path, block_size, row_shift, col_shift),
       output_stream_(input_path, output_path, row_shift, col_shift) {}
 
-void ShiftStreamer::Stream(FrequencyTranslation& frequency_shifter) {
+void ShiftStreamer::Stream(IFrequencyTranslation& frequency_shifter) {
     LOG("shift_streamer", info, "stream block size: {}x{}", block_size_.row,
         block_size_.col);
     if (max_parallel_workers_ == 1) {
@@ -52,7 +52,7 @@ void ShiftStreamer::Stream(FrequencyTranslation& frequency_shifter) {
 }
 
 void ShiftStreamer::RunMonothreadStream(
-      FrequencyTranslation& frequency_shifter) {
+      IFrequencyTranslation& frequency_shifter) {
     LOG("shift_streamer", info, "start monothreaded streaming");
     while (!input_stream_.IsAtEnd()) {
         std::error_code read_ec;
@@ -63,7 +63,7 @@ void ShiftStreamer::RunMonothreadStream(
             break;
         }
 
-        block.buffer = std::move(frequency_shifter.Shift(block.buffer));
+        block.buffer = std::move(frequency_shifter.Compute(block.buffer));
 
         std::error_code write_ec;
         output_stream_.Write(std::move(block), write_ec);
@@ -77,7 +77,7 @@ void ShiftStreamer::RunMonothreadStream(
 }
 
 void ShiftStreamer::RunMultithreadStream(
-      FrequencyTranslation& frequency_shifter) {
+      IFrequencyTranslation& frequency_shifter) {
     LOG("shift_streamer", info, "start multithreaded streaming");
 
     // use block queues
@@ -124,7 +124,8 @@ void ShiftStreamer::RunMultithreadStream(
                     break;
                 }
 
-                block.buffer = std::move(frequency_shifter.Shift(block.buffer));
+                block.buffer =
+                      std::move(frequency_shifter.Compute(block.buffer));
 
                 std::error_code push_output_ec;
                 output_queue.Push(std::move(block), push_output_ec);

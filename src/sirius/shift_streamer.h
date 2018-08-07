@@ -22,7 +22,7 @@
 #ifndef SIRIUS_SHIFT_STREAMER_H_
 #define SIRIUS_SHIFT_STREAMER_H_
 
-#include "sirius/translation/frequency_translation.h"
+#include "sirius/i_frequency_translator.h"
 
 #include "sirius/gdal/shifted_input_stream.h"
 #include "sirius/gdal/shifted_output_stream.h"
@@ -56,7 +56,7 @@ class ShiftStreamer {
      * \param frequency_shifter requested frequency shifter to apply on
      *   stream block
      */
-    void Stream(FrequencyTranslation& frequency_shifter);
+    void Stream(IFrequencyTranslation& frequency_shifter);
 
   private:
     /**
@@ -67,7 +67,7 @@ class ShiftStreamer {
      *
      * \param frequency_shifter frequency translation to apply on stream block
      */
-    void RunMonothreadStream(FrequencyTranslation& frequency_shifter);
+    void RunMonothreadStream(IFrequencyTranslation& frequency_shifter);
 
     /**
      * \brief Stream image in multithreading mode
@@ -80,7 +80,7 @@ class ShiftStreamer {
      *
      * \param frequency_shifted frequency translation to apply on stream block
      */
-    void RunMultithreadStream(FrequencyTranslation& frequency_shifter);
+    void RunMultithreadStream(IFrequencyTranslation& frequency_shifter);
 
   private:
     unsigned int max_parallel_workers_;

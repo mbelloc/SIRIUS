@@ -106,9 +106,9 @@ StreamBlock ShiftedInputStream::Read(std::error_code& ec) {
 
     if (col_idx_ >= w - block_size_.col) {
         col_idx_ = 0;
-        row_idx_ += block_size_.row - std::ceil(abs(row_shift_));
+        row_idx_ += block_size_.row - std::ceil(std::abs(row_shift_));
     } else {
-        col_idx_ += block_size_.col - std::ceil(abs(col_shift_));
+        col_idx_ += block_size_.col - std::ceil(std::abs(col_shift_));
     }
 
     LOG("shifted_input_stream", debug, "reading block of size {}x{} at ({},{})",

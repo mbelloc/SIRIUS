@@ -56,7 +56,6 @@ class ShiftedOutputStream {
 
   private:
     gdal::DatasetUPtr output_dataset_;
-    float row_shift_, col_shift_;
 };
 
 }  // namespace gdal

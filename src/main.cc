@@ -41,7 +41,7 @@
 #include "sirius/utils/log.h"
 #include "sirius/utils/numeric.h"
 
-#include "sirius/translation/frequency_translation.h"
+#include "sirius/frequency_translation_factory.h"
 
 struct CliParameters {
     // status
@@ -69,23 +69,22 @@ struct CliParameters {
     // filter options
     std::string filter_path;
     bool zero_pad_real_edges = false;
+    sirius::Point hot_point = sirius::Point(-1, -1);
 
     // stream mode options
     bool stream_mode = false;
-    int stream_block_height = 256;
-    int stream_block_width = 256;
+    sirius::Size stream_block_size = sirius::Size(256, 256);
     bool stream_no_block_resizing = false;
     bool filter_normalize = false;
-    int hot_point_x = -1;
-    int hot_point_y = -1;
     unsigned int stream_parallel_workers = std::thread::hardware_concurrency();
 
     bool HasStreamMode() const {
-        return stream_mode && stream_block_height > 0 && stream_block_width > 0;
+        return stream_mode && stream_block_size.row > 0 &&
+               stream_block_size.col > 0;
     }
 
     sirius::Size GetStreamBlockSize() const {
-        return {stream_block_height, stream_block_width};
+        return {stream_block_size.row, stream_block_size.col};
     }
 };
 
@@ -94,13 +93,13 @@ void RunRegularMode(const sirius::IFrequencyResampler& frequency_resampler,
                     const sirius::Filter& filter,
                     const sirius::ZoomRatio& zoom_ratio,
                     const CliParameters& params);
-void RunRegularShiftMode(sirius::FrequencyTranslation& frequency_shifter,
+void RunRegularShiftMode(sirius::IFrequencyTranslation& frequency_shifter,
                          const CliParameters& params);
 void RunStreamMode(const sirius::IFrequencyResampler& frequency_resampler,
                    const sirius::Filter& filter,
                    const sirius::ZoomRatio& zoom_ratio,
                    const CliParameters& params);
-void RunStreamShiftMode(sirius::FrequencyTranslation& frequency_shift,
+void RunStreamShiftMode(sirius::IFrequencyTranslation& frequency_shift,
                         const CliParameters& params);
 
 int main(int argc, const char* argv[]) {
@@ -122,14 +121,30 @@ int main(int argc, const char* argv[]) {
     LOG("sirius", info, "Sirius {} - {}", sirius::kVersion, sirius::kGitCommit);
 
     try {
+        // decomposition parameters
+        sirius::ImageDecompositionPolicies image_decomposition_policy =
+              sirius::ImageDecompositionPolicies::kPeriodicSmooth;
+        sirius::FrequencyZoomStrategies zoom_strategy =
+              sirius::FrequencyZoomStrategies::kPeriodization;
+
+        if (params.no_image_decomposition) {
+            LOG("sirius", info, "image decomposition: none");
+            image_decomposition_policy =
+                  sirius::ImageDecompositionPolicies::kRegular;
+        } else {
+            LOG("sirius", info, "image decomposition: periodic plus smooth");
+        }
+
         if (params.row_translation != 0.0 || params.col_translation != 0.0) {
-            sirius::FrequencyTranslation freq_trans(params.row_translation,
-                                                    params.col_translation);
+            LOG("sirius", info, "translation mode");
+            auto freq_trans = sirius::FrequencyTranslationFactory::Create(
+                  image_decomposition_policy, params.row_translation,
+                  params.col_translation);
             if (!params.stream_mode) {
-                RunRegularShiftMode(freq_trans, params);
+                RunRegularShiftMode(*freq_trans, params);
                 return 0;
             } else {
-                RunStreamShiftMode(freq_trans, params);
+                RunStreamShiftMode(*freq_trans, params);
                 return 0;
             }
         }
@@ -155,7 +170,7 @@ int main(int argc, const char* argv[]) {
         sirius::Filter filter;
         if (!params.filter_path.empty()) {
             LOG("sirius", info, "filter path: {}", params.filter_path);
-            sirius::Point hp(params.hot_point_x, params.hot_point_y);
+            sirius::Point hp(params.hot_point.x, params.hot_point.y);
 
             filter =
                   sirius::Filter::Create(params.filter_path, zoom_ratio, hp,
@@ -163,19 +178,6 @@ int main(int argc, const char* argv[]) {
         }
 
         // resampling parameters
-        sirius::ImageDecompositionPolicies image_decomposition_policy =
-              sirius::ImageDecompositionPolicies::kPeriodicSmooth;
-        sirius::FrequencyZoomStrategies zoom_strategy =
-              sirius::FrequencyZoomStrategies::kPeriodization;
-
-        if (params.no_image_decomposition) {
-            LOG("sirius", info, "image decomposition: none");
-            image_decomposition_policy =
-                  sirius::ImageDecompositionPolicies::kRegular;
-        } else {
-            LOG("sirius", info, "image decomposition: periodic plus smooth");
-        }
-
         if (zoom_ratio.ratio() > 1) {
             // choose the upsampling algorithm only if ratio > 1
             if (params.upsample_periodization && !filter.IsLoaded()) {
@@ -248,7 +250,7 @@ void RunRegularMode(const sirius::IFrequencyResampler& frequency_resampler,
                             resampled_geo_ref);
 }
 
-void RunRegularShiftMode(sirius::FrequencyTranslation& frequency_shifter,
+void RunRegularShiftMode(sirius::IFrequencyTranslation& frequency_shifter,
                          const CliParameters& params) {
     LOG("sirius", info, "regular shift mode");
     auto input_image = sirius::gdal::LoadImage(params.input_image_path);
@@ -259,7 +261,7 @@ void RunRegularShiftMode(sirius::FrequencyTranslation& frequency_shifter,
           params.input_image_path, params.row_translation,
           params.col_translation);
 
-    auto shifted_image = frequency_shifter.Shift(input_image);
+    auto shifted_image = frequency_shifter.Compute(input_image);
 
     LOG("sirius", info, "shifted image '{}' ({}x{})", params.output_image_path,
         shifted_image.size.row, shifted_image.size.col);
@@ -302,7 +304,7 @@ void RunStreamMode(const sirius::IFrequencyResampler& frequency_resampler,
     streamer.Stream(frequency_resampler, filter);
 }
 
-void RunStreamShiftMode(sirius::FrequencyTranslation& frequency_shifter,
+void RunStreamShiftMode(sirius::IFrequencyTranslation& frequency_shifter,
                         const CliParameters& params) {
     LOG("sirius", info, "streaming shift mode");
     unsigned int max_parallel_workers =
@@ -310,8 +312,8 @@ void RunStreamShiftMode(sirius::FrequencyTranslation& frequency_shifter,
                             std::thread::hardware_concurrency()),
                    1u);
     auto stream_block_size = params.GetStreamBlockSize();
-    stream_block_size.row += std::ceil(abs(params.row_translation));
-    stream_block_size.col += std::ceil(abs(params.col_translation));
+    stream_block_size.row += std::ceil(std::abs(params.row_translation));
+    stream_block_size.col += std::ceil(std::abs(params.col_translation));
 
     sirius::ShiftStreamer streamer(
           params.input_image_path, params.output_image_path, stream_block_size,
@@ -384,19 +386,19 @@ CliParameters GetCliParameters(int argc, const char* argv[]) {
         ("hot-point-x",
          "Hot point x coordinate "
          "(considered centered if no value is provided)",
-         cxxopts::value(params.hot_point_x))
+         cxxopts::value(params.hot_point.x))
         ("hot-point-y",
          "Hot point y coordinate "
          "(considered centered if no value is provided)",
-         cxxopts::value(params.hot_point_y));
+         cxxopts::value(params.hot_point.y));
 
     options.add_options("streaming")
         ("stream", "Enable stream mode",
          cxxopts::value(params.stream_mode))
         ("block-width", "Initial width of a stream block",
-         cxxopts::value(params.stream_block_width)->default_value("256"))
+         cxxopts::value(params.stream_block_size.col)->default_value("256"))
         ("block-height", "Initial height of a stream block",
-         cxxopts::value(params.stream_block_height)->default_value("256"))
+         cxxopts::value(params.stream_block_size.row)->default_value("256"))
         ("no-block-resizing",
          "Disable block resizing optimization",
          cxxopts::value(params.stream_no_block_resizing))

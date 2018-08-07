@@ -19,7 +19,7 @@
  * along with Sirius.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "sirius/translation/frequency_translation.h"
+#include "sirius/translation/frequency_translator.h"
 
 #include <cstring>
 
@@ -32,11 +32,20 @@
 #include "sirius/fftw/wrapper.h"
 
 namespace sirius {
+namespace translation {
+
+/**
+  \brief remove borders according to given shifts.
+  \param row_shift shift on y axis
+  \param col_shift shift on x axis
+  \return cropped image
+ */
+Image RemoveBorders(const Image& image, int row_shift, int col_shift);
 
 FrequencyTranslation::FrequencyTranslation(float row_shift, float col_shift)
     : row_shift_(row_shift), col_shift_(col_shift) {}
 
-Image FrequencyTranslation::Shift(const Image& image) {
+Image FrequencyTranslation::Process(const Image& image) {
     if (row_shift_ >= image.size.row || col_shift_ >= image.size.col ||
         row_shift_ <= -image.size.row || col_shift_ <= -image.size.col) {
         LOG("sirius", warn,
@@ -49,7 +58,7 @@ Image FrequencyTranslation::Shift(const Image& image) {
         col_shift_ /= static_cast<float>(image.size.col);
     }
 
-    LOG("sirius", trace, "Translation x:{}, y:{}", col_shift_, row_shift_);
+    // LOG("sirius", trace, "Translation x:{}, y:{}", col_shift_, row_shift_);
 
     float reduced_x_shift = col_shift_ - static_cast<int>(col_shift_);
     float reduced_y_shift = row_shift_ - static_cast<int>(row_shift_);
@@ -151,11 +160,71 @@ Image FrequencyTranslation::Shift(const Image& image) {
     return RemoveBorders(output_image, reduced_y_shift, reduced_x_shift);
 }
 
-Image FrequencyTranslation::RemoveBorders(const Image& image, int row_shift,
-                                          int col_shift) {
-    LOG("FrequencyTranslation", trace, "Remove borders x:{}, y:{}", col_shift,
-        row_shift);
+TranslationInterpolator2D::TranslationInterpolator2D(float row_shift,
+                                                     float col_shift)
+    : row_shift_(row_shift), col_shift_(col_shift) {}
 
+Image TranslationInterpolator2D::Interpolate2D(const Image& image) {
+    LOG("interpolated2D", trace, "input image size {}x{}", image.size.row,
+        image.size.col);
+    Image interpolated_im(image.size);
+    interpolated_im = image;
+
+    float beta = row_shift_ - static_cast<int>(row_shift_);
+    float alpha = col_shift_ - static_cast<int>(col_shift_);
+    LOG("TranslationInterpolator2D", trace, "alpha = {}, beta={}", alpha, beta);
+    std::vector<double> BLN_kernel(4, 0);
+    BLN_kernel[0] = (1 - alpha) * (1 - beta);
+    BLN_kernel[1] = (1 - beta) * alpha;
+    BLN_kernel[2] = beta * (1 - alpha);
+    BLN_kernel[3] = alpha * beta;
+
+    Size img_mirror_size(image.size.row + 1, image.size.col + 1);
+
+    std::vector<double> img_mirror(img_mirror_size.CellCount(), 0);
+    auto img_mirror_span = gsl::as_multi_span(img_mirror);
+    for (int i = 0; i < image.size.row; i++) {
+        for (int j = 0; j < image.size.col; j++) {
+            img_mirror_span[i * (image.size.col + 1) + j] = image.Get(i, j);
+        }
+    }
+
+    // duplicate last row
+    for (int j = 0; j < image.size.col + 1; j++) {
+        img_mirror_span[image.size.row * (image.size.col + 1) + j] =
+              img_mirror_span[(image.size.row - 1) * (image.size.col + 1) + j];
+    }
+
+    // duplicate last col
+    for (int i = 0; i < image.size.row + 1; i++) {
+        img_mirror_span[(i + 1) * (image.size.col + 1) - 1] =
+              img_mirror_span[(i + 1) * (image.size.col + 1) - 2];
+    }
+
+    // convolve. BLN_kernel is already flipped
+    for (int i = 0; i < image.size.row; ++i) {
+        for (int j = 0; j < image.size.col; ++j) {
+            interpolated_im.Set(
+                  i, j,
+                  img_mirror_span[i * img_mirror_size.col + j] * BLN_kernel[0] +
+                        img_mirror_span[i * img_mirror_size.col + j + 1] *
+                              BLN_kernel[1] +
+                        img_mirror_span[(i + 1) * img_mirror_size.col + j] *
+                              BLN_kernel[2] +
+                        img_mirror_span[(i + 1) * img_mirror_size.col + j + 1] *
+                              BLN_kernel[3]);
+        }
+    }
+
+    // use "- shift" to remove borders that should have been replicated on the
+    // opposite side of the translation if we had passed the entire shift
+    return RemoveBorders(interpolated_im, std::ceil(-row_shift_),
+                         std::ceil(-col_shift_));
+    ;
+}
+
+Image RemoveBorders(const Image& image, int row_shift, int col_shift) {
+    LOG("RemoveBorders", trace, "removed size {}x{}", row_shift, col_shift);
     if (col_shift == 0 && row_shift == 0) {
         return image;
     }
@@ -180,17 +249,17 @@ Image FrequencyTranslation::RemoveBorders(const Image& image, int row_shift,
         end_col = image.size.col + col_shift;
     }
 
-    int begin_src = begin_row * image.size.col + begin_col;
     int nb_elem = end_col - begin_col;
-    int begin = 0;
+    auto src_it = image.data.begin() + (begin_row * image.size.col + begin_col);
+    auto output_it = output_image.data.begin();
     for (int i = begin_row; i < end_row; ++i) {
-        memcpy(&output_image.data[begin], &image.data[begin_src],
-               nb_elem * sizeof(double));
-        begin_src += image.size.col;
-        begin += nb_elem;
+        std::copy(src_it, src_it + nb_elem, output_it);
+        src_it += image.size.col;
+        output_it += nb_elem;
     }
 
     return output_image;
 }
 
-}  // end namespace sirius
+}  // namespace translation
+}  // namespace sirius

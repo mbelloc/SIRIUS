@@ -72,6 +72,7 @@ DatasetUPtr CreateDataset(const std::string& filepath, int w, int h,
     auto driver = ::GetGDALDriverManager()->GetDriverByName("GTiff");
     DatasetUPtr dataset(
           driver->Create(filepath.c_str(), w, h, n_bands, GDT_Float32, NULL));
+
     if (dataset == nullptr) {
         LOG("gdal", error, "could not create the image file '{}'", filepath);
         throw gdal::Exception();

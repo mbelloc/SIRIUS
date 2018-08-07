@@ -19,37 +19,43 @@
  * along with Sirius.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SIRIUS_TRANSLATION_FREQUENCY_TRANSLATION_H_
-#define SIRIUS_TRANSLATION_FREQUENCY_TRANSLATION_H_
+#ifndef SIRIUS_I_FREQUENCY_TRANSLATION_H_
+#define SIRIUS_I_FREQUENCY_TRANSLATION_H_
 
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "sirius/filter.h"
 #include "sirius/image.h"
 #include "sirius/types.h"
 
 namespace sirius {
 
-class FrequencyTranslation {
+/**
+ * \class IFrequencyTranslation
+ * \brief Interface that frequency translation should implement
+ */
+class IFrequencyTranslation {
   public:
-    FrequencyTranslation() = default;
+    using UPtr = std::unique_ptr<IFrequencyTranslation>;
 
-    ~FrequencyTranslation() = default;
+  public:
+    virtual ~IFrequencyTranslation() = default;
 
-    // non copyable
-    FrequencyTranslation(const FrequencyTranslation&) = delete;
-    FrequencyTranslation& operator=(const FrequencyTranslation&) = delete;
-    // moveable
-    FrequencyTranslation(FrequencyTranslation&&) = default;
-    FrequencyTranslation& operator=(FrequencyTranslation&&) = default;
-
-    FrequencyTranslation(float row_shift, float col_shift);
-
-    Image Shift(const Image& image);
-
-  private:
-    Image RemoveBorders(const Image& image, int shift_col, int shift_row);
-
-    float row_shift_, col_shift_;
+    /**
+     * \brief Shift an image
+     *
+     * \remark This method is thread safe
+     *
+     * \param input image to shift
+     * \return Shifted image
+     *
+     * \throw SiriusException if a computing issue happens
+     */
+    virtual Image Compute(const Image& input) const = 0;
 };
 
-}  // end namespace sirius
+}  // namespace sirius
 
-#endif  // SIRIUS_TRANSLATION_FREQUENCY_TRANSLATION_H_
+#endif  // SIRIUS_I_FREQUENCY_TRANSLATION_H_

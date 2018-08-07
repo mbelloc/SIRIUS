@@ -19,41 +19,31 @@
  * along with Sirius.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SIRIUS_FREQUENCY_RESAMPLER_FACTORY_H_
-#define SIRIUS_FREQUENCY_RESAMPLER_FACTORY_H_
+#ifndef SIRIUS_FREQUENCY_TRANSLATION_FACTORY_H_
+#define SIRIUS_FREQUENCY_TRANSLATION_FACTORY_H_
 
-#include "sirius/i_frequency_resampler.h"
+#include "sirius/i_frequency_translator.h"
 
 #include "sirius/image_decomposition/policies.h"
 
 namespace sirius {
 
 /**
- * \brief Enum of supported frequency zoom strategies
+ * \brief Factory of IFrequencyTranslation
  */
-enum class FrequencyZoomStrategies {
-    kZeroPadding = 0, /**< zero padding zoom */
-    kPeriodization    /**< periodization zoom */
-};
-
-/**
- * \brief Factory of IFrequencyResampler that composes an image decomposition
- *   policy and a zoom strategy
- */
-class FrequencyResamplerFactory {
+class FrequencyTranslationFactory {
   public:
     /**
-     * \brief IFrequencyResampler factory
+     * \brief IFrequencyTranslation factory
      * \param image_decomposition cf. ImageDecompositionPolicies enum
-     * \param zoom_strategy cf. FrequencyZoomStrategies enum
-     * \return requested composition of FrequencyResampler | nullptr if not
+     * \return requested composition of IFrequencyTranslation | nullptr if not
      * available
      */
-    static IFrequencyResampler::UPtr Create(
-          ImageDecompositionPolicies image_decomposition,
-          FrequencyZoomStrategies zoom_strategy);
+    static IFrequencyTranslation::UPtr Create(
+          ImageDecompositionPolicies image_decomposition, float shift_row,
+          float shift_col);
 };
 
 }  // namespace sirius
 
-#endif  // SIRIUS_FREQUENCY_RESAMPLER_FACTORY_H_
+#endif  // SIRIUS_FREQUENCY_TRANSLATION_FACTORY_H_

@@ -36,6 +36,10 @@ set(SIRIUS_SRC
     sirius/frequency_resampler_factory.h
     sirius/frequency_resampler_factory.cc
 
+    sirius/i_frequency_translator.h
+    sirius/frequency_translation_factory.h
+    sirius/frequency_translation_factory.cc
+
     sirius/image_streamer.h
     sirius/image_streamer.cc
     sirius/shift_streamer.h
@@ -51,9 +55,16 @@ set(SIRIUS_SRC
     sirius/resampler/zoom_strategy/zero_padding_strategy.h
     sirius/resampler/zoom_strategy/zero_padding_strategy.cc
 
-    #translation
-    sirius/translation/frequency_translation.h
-    sirius/translation/frequency_translation.cc
+    # image_decomposition
+    sirius/image_decomposition/periodic_smooth_policy.h
+    sirius/image_decomposition/periodic_smooth_policy.cc
+    sirius/image_decomposition/regular_policy.h
+    sirius/image_decomposition/regular_policy.cc
+
+    # translation
+    sirius/frequency_translater.h
+    sirius/translation/frequency_translator.h
+    sirius/translation/frequency_translator.cc
 
     # resampler image decomposition policies
     sirius/resampler/image_decomposition/regular_policy.h
