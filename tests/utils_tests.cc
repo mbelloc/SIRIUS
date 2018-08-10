@@ -322,6 +322,8 @@ TEST_CASE("utils tests - FFTShift2DUncentered", "[sirius]") {
 }
 
 TEST_CASE("utils test - LRU cache", "[sirius]") {
+    LOG_SET_LEVEL(trace);
+
     struct DummyStruct {
         DummyStruct() = default;
         DummyStruct(int val) : value(val) {}
@@ -365,6 +367,8 @@ TEST_CASE("utils test - LRU cache", "[sirius]") {
 }
 
 TEST_CASE("utils test - FFTFreq", "[sirius]") {
+    LOG_SET_LEVEL(trace);
+
     std::vector<double> freq = sirius::utils::ComputeFFTFreq(5, false);
     REQUIRE(freq[0] == 0.0);
     REQUIRE(freq[1] == 0.2);
@@ -380,6 +384,8 @@ TEST_CASE("utils test - FFTFreq", "[sirius]") {
 }
 
 TEST_CASE("utils test - Meshgrid", "[sirius]") {
+    LOG_SET_LEVEL(trace);
+
     std::vector<int> xx, yy;
     sirius::utils::CreateMeshgrid(0, 3, 0, 3, xx, yy);
 
@@ -431,4 +437,16 @@ TEST_CASE("utils test - Meshgrid", "[sirius]") {
     REQUIRE(yy[9] == 2);
     REQUIRE(yy[10] == 2);
     REQUIRE(yy[11] == 2);
+}
+
+TEST_CASE("utils test - Dyadic size", "[sirius]") {
+    LOG_SET_LEVEL(trace);
+
+    auto res = sirius::utils::GenerateDyadicSize({250, 500}, 1, {0,0});
+    REQUIRE(res.row == 256);
+    REQUIRE(res.col == 512);
+
+    res = sirius::utils::GenerateDyadicSize({210, 450}, 1, {20, 35});
+    REQUIRE(res.row == 236);
+    REQUIRE(res.col == 477);
 }

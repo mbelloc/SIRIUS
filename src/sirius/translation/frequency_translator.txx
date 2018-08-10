@@ -19,37 +19,22 @@
  * along with Sirius.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "utils.h"
+#ifndef SIRIUS_FREQUENCY_TRANSLATOR_TXX_
+#define SIRIUS_FREQUENCY_TRANSLATOR_TXX_
+
+#include "sirius/translation/frequency_translator.h"
 
 namespace sirius {
-namespace tests {
+namespace translation {
 
-sirius::Image CreateDummyImage(const sirius::Size& size) {
-    sirius::Image image(size);
-
-    for (int row = 0; row < size.row; ++row) {
-        for (int col = 0; col < size.col; ++col) {
-            image.Set(row, col, row * 10 + col + 1);
-        }
-    }
-
-    return image;
+template <template <class, class, class> class ImageDecompositionPolicy>
+Image FrequencyTranslator<ImageDecompositionPolicy>::Compute(
+      const Image& input, const Padding&,
+      const Parameters& translation_parameters) const {
+    return this->DecomposeAndProcess(input, translation_parameters);
 }
 
-sirius::Image CreateSquaredImage(const sirius::Size& size) {
-    sirius::Image image(size);
-
-    for (int row = 0; row < size.row; ++row) {
-        for (int col = 0; col < size.col; ++col) {
-            if ((row < (size.row / 2) && col < (size.col / 2)) ||
-                (row > (size.row / 2) && col > (size.col / 2))) {
-                image.Set(row, col, 65535);
-            }
-        }
-    }
-
-    return image;
-}
-
-}  // namespace tests
+}  // namespace translation
 }  // namespace sirius
+
+#endif  // SIRIUS_FREQUENCY_TRANSLATOR_TXX_

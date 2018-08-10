@@ -70,7 +70,6 @@ class InputStream : public IInputStream {
     gdal::DatasetUPtr input_dataset_;
     sirius::Size block_size_{256, 256};
     sirius::Size block_margin_size_;
-    PaddingType block_padding_type_;
     bool is_ended_ = false;
     int row_idx_ = 0;
     int col_idx_ = 0;

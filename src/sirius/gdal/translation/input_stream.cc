@@ -1,3 +1,24 @@
+/**
+ * Copyright (C) 2018 CS - Systemes d'Information (CS-SI)
+ *
+ * This file is part of Sirius
+ *
+ *     https://github.com/CS-SI/SIRIUS
+ *
+ * Sirius is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Sirius is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Sirius.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "sirius/gdal/translation/input_stream.h"
 
 #include "sirius/utils/numeric.h"
@@ -16,8 +37,8 @@ InputStream::InputStream(
       col_idx_(0),
       row_shift_(translation_parameters.row_shift),
       col_shift_(translation_parameters.col_shift) {
-    block_size_.row += std::ceil(std::abs(row_shift_));
-    block_size_.col += std::ceil(std::abs(col_shift_));
+    block_size_.row += static_cast<int>(std::ceil(std::abs(row_shift_)));
+    block_size_.col += static_cast<int>(std::ceil(std::abs(col_shift_)));
     if (block_size_.row <= 0 || block_size_.col <= 0) {
         LOG("translation_input_stream", error, "invalid block size");
         throw sirius::Exception("invalid block size");
@@ -83,9 +104,11 @@ StreamBlock InputStream::Read(std::error_code& ec) {
 
     if (col_idx_ >= w - block_size_.col) {
         col_idx_ = 0;
-        row_idx_ += block_size_.row - std::ceil(std::abs(row_shift_));
+        row_idx_ += block_size_.row -
+                    static_cast<int>(std::ceil(std::abs(row_shift_)));
     } else {
-        col_idx_ += block_size_.col - std::ceil(std::abs(col_shift_));
+        col_idx_ += block_size_.col -
+                    static_cast<int>(std::ceil(std::abs(col_shift_)));
     }
 
     LOG("translation_input_stream", debug,

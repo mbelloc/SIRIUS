@@ -29,11 +29,11 @@ namespace sirius {
 namespace gdal {
 
 GeoReference::GeoReference()
-    : geo_transform{0, 1, 0, 0, 0, 1},
+    : geo_transform{{0, 1, 0, 0, 0, 1}},
       projection_ref(""),
       is_initialized(false) {}
 
-GeoReference::GeoReference(const std::vector<double>& geo_trans,
+GeoReference::GeoReference(const GeoTransform& geo_trans,
                            const std::string& proj_ref)
     : geo_transform(geo_trans),
       projection_ref(proj_ref),
@@ -143,24 +143,8 @@ void Save(const Image& image, const std::string& output_filepath,
     }
 }
 
-GeoReference ComputeResampledGeoReference(const std::string& input_path,
-                                          const ZoomRatio& zoom_ratio) {
-    auto input_dataset = sirius::gdal::LoadDataset(input_path);
-
-    return {ComputeResampledGeoTransform(input_dataset.get(), zoom_ratio),
-            input_dataset->GetProjectionRef()};
-}
-
-std::vector<double> ComputeResampledGeoTransform(GDALDataset* dataset,
-                                                 const ZoomRatio& zoom_ratio) {
-    std::vector<double> geo_transform(6);
-    CPLErr err = dataset->GetGeoTransform(geo_transform.data());
-    if (err) {
-        LOG("gdal", debug,
-            "GDAL error: {} - could not read input geo transform", err);
-        return geo_transform;
-    }
-
+void ComputeResampledGeoTransform(GeoReference::GeoTransform& geo_transform,
+                                  const ZoomRatio& zoom_ratio) {
     // move origin to the center of input top left pixel
     geo_transform[0] += (0.5 * geo_transform[1]);
     geo_transform[3] += (0.5 * geo_transform[5]);
@@ -174,33 +158,41 @@ std::vector<double> ComputeResampledGeoTransform(GDALDataset* dataset,
     // place output origin to the top left corner of top left pixel
     geo_transform[0] -= (0.5 * geo_transform[1]);
     geo_transform[3] -= (0.5 * geo_transform[5]);
-
-    return geo_transform;
 }
 
-GeoReference ComputeShiftedGeoReference(const std::string& input_path,
-                                        float row_shift, float col_shift) {
-    auto dataset = sirius::gdal::LoadDataset(input_path);
-
-    return {ComputeShiftedGeoTransform(dataset.get(), row_shift, col_shift),
-            dataset->GetProjectionRef()};
-}
-
-std::vector<double> ComputeShiftedGeoTransform(GDALDataset* dataset,
-                                               float row_shift,
-                                               float col_shift) {
-    std::vector<double> geo_transform(6);
-    CPLErr err = dataset->GetGeoTransform(geo_transform.data());
+GeoReference ComputeResampledGeoReference(const std::string& input_path,
+                                          const ZoomRatio& zoom_ratio) {
+    auto input_dataset = sirius::gdal::LoadDataset(input_path);
+    std::array<double, 6> geo_transform;
+    CPLErr err = input_dataset->GetGeoTransform(geo_transform.data());
     if (err) {
         LOG("gdal", debug,
-            "GDAL error: {} - could not read input geo transform");
-        return geo_transform;
+            "GDAL error: {} - could not read input geo info", err);
+        return {};
     }
+    ComputeResampledGeoTransform(geo_transform, zoom_ratio);
+    return {geo_transform, input_dataset->GetProjectionRef()};
+}
 
+void ComputeShiftedGeoTransform(
+      GeoReference::GeoTransform& geo_transform, float row_shift,
+      float col_shift) {
     geo_transform[0] += row_shift * geo_transform[1];
     geo_transform[3] += col_shift * geo_transform[5];
+}
 
-    return geo_transform;
+GeoReference ComputeTranslationGeoReference(const std::string& input_path,
+                                            float row_shift, float col_shift) {
+    auto input_dataset = sirius::gdal::LoadDataset(input_path);
+    std::array<double, 6> geo_transform;
+    CPLErr err = input_dataset->GetGeoTransform(geo_transform.data());
+    if (err) {
+        LOG("gdal", debug,
+            "GDAL error: {} - could not read input geo info", err);
+        return {};
+    }
+    ComputeShiftedGeoTransform(geo_transform, row_shift, col_shift);
+    return {geo_transform, input_dataset->GetProjectionRef()};
 }
 
 }  // namespace gdal

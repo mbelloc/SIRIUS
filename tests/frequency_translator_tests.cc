@@ -41,7 +41,7 @@ TEST_CASE("frequency translater - periodic smooth", "[sirius]") {
           sirius::image_decomposition::Policies::kPeriodicSmooth);
 
     // test input
-    auto lena_image = sirius::gdal::LoadImage(sirius::tests::kLenaImagePath);
+    auto lena_image = sirius::gdal::Load(sirius::tests::kLenaImagePath);
 
     // output
     sirius::Image output;
@@ -81,7 +81,7 @@ TEST_CASE("frequency translater - periodic smooth", "[sirius]") {
     }
 
     SECTION("lena - negative translation on x axis") {
-        sirius::translation::Parameters params{0.0, -50.0};
+        sirius::translation::Parameters params{0.0f, -50.0f};
         REQUIRE_NOTHROW(output = freq_trans->Compute(lena_image, {}, params));
         REQUIRE(output.data.size() > 0);
         REQUIRE(output.size.row == lena_image.size.row);
@@ -94,7 +94,7 @@ TEST_CASE("frequency translater - periodic smooth", "[sirius]") {
     }
 
     SECTION("lena - negative translation on y axis") {
-        sirius::translation::Parameters params{-50.0, 0.0};
+        sirius::translation::Parameters params{-50.0f, 0.0f};
         REQUIRE_NOTHROW(output = freq_trans->Compute(lena_image, {}, params));
         REQUIRE(output.data.size() > 0);
         REQUIRE(output.size.row == lena_image.size.row - 50.0);
@@ -107,7 +107,7 @@ TEST_CASE("frequency translater - periodic smooth", "[sirius]") {
     }
 
     SECTION("lena - sub pixel translation") {
-        sirius::translation::Parameters params{-50.72, 50.72};
+        sirius::translation::Parameters params{-50.72f, 50.72f};
         REQUIRE_NOTHROW(output = freq_trans->Compute(lena_image, {}, params));
         REQUIRE(output.data.size() > 0);
         REQUIRE(output.size.row == lena_image.size.row - 51);
@@ -118,7 +118,7 @@ TEST_CASE("frequency translater - periodic smooth", "[sirius]") {
     }
 
     SECTION("lena - no translation") {
-        sirius::translation::Parameters params{0.0, 0.0};
+        sirius::translation::Parameters params{0.0f, 0.0f};
         REQUIRE_NOTHROW(output = freq_trans->Compute(lena_image, {}, params));
         REQUIRE(output.data.size() > 0);
         REQUIRE(output.size.row == lena_image.size.row);

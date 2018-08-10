@@ -22,22 +22,46 @@
 #include <sirius/utils/log.h>
 
 #include <sirius/frequency_resampler_factory.h>
+#include <sirius/frequency_translator_factory.h>
 #include <sirius/types.h>
 #include "sirius/filter.h"
 #include "sirius/image.h"
 
+void Resample(const sirius::Image& image);
+void Translate(const sirius::Image& image);
+
 int main(int, char**) {
     LOG_SET_LEVEL(trace);
 
-    auto zoom_ratio_2_1 = sirius::ZoomRatio::Create(2, 1);
+    auto dummy_image = sirius::Image({1000, 750});
 
-    auto dummy_image = sirius::Image({5, 5});
+    Resample(dummy_image);
+    Translate(dummy_image);
+}
+
+void Resample(const sirius::Image& image) {
+    LOG("basic_test", info, "resample image");
+
+    auto zoom_ratio_2_1 = sirius::ZoomRatio::Create(2, 1);
 
     sirius::IFrequencyResampler::UPtr freq_resampler =
           sirius::FrequencyResamplerFactory::Create(
                 sirius::image_decomposition::Policies::kRegular,
                 sirius::FrequencyUpsamplingStrategies::kZeroPadding);
 
+    sirius::resampling::Parameters resampling_params{zoom_ratio_2_1};
     sirius::Image zoomed_image_2_1 =
-          freq_resampler->Compute(dummy_image, {}, {zoom_ratio_2_1, nullptr});
+          freq_resampler->Compute(image, {}, resampling_params);
+}
+
+void Translate(const sirius::Image& image) {
+    LOG("basic_test", info, "translate image");
+
+    sirius::translation::Parameters translation_parameters{20.5, 19.5};
+    sirius::IFrequencyTranslator::UPtr freq_translator =
+          sirius::FrequencyTranslatorFactory::Create(
+                sirius::image_decomposition::Policies::kPeriodicSmooth);
+
+    sirius::Image translated_image =
+          freq_translator->Compute(image, {}, translation_parameters);
 }

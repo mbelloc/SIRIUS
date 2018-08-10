@@ -34,9 +34,10 @@ namespace gdal {
  * \brief Data class that represents GDAL geo reference information
  */
 struct GeoReference {
+    using GeoTransform = std::array<double, 6>;
+
     GeoReference();
-    GeoReference(const std::vector<double>& geo_trans,
-                 const std::string& proj_ref);
+    GeoReference(const GeoTransform& geo_trans, const std::string& proj_ref);
 
     ~GeoReference() = default;
     GeoReference(const GeoReference&) = default;
@@ -44,7 +45,7 @@ struct GeoReference {
     GeoReference(GeoReference&&) = default;
     GeoReference& operator=(GeoReference&&) = default;
 
-    std::vector<double> geo_transform;
+    GeoTransform geo_transform;
     std::string projection_ref;
     bool is_initialized{false};
 };
@@ -68,26 +69,13 @@ GeoReference ComputeResampledGeoReference(const std::string& input_path,
                                           const ZoomRatio& zoom_ratio);
 
 /**
- * \brief Compute output image origin and pixel size
- * \param dataset input dataset
- * \param zoom_ratio zoom ratio to be applied
- * \return new geo transform
+ * \brief Compute translation georeference information
+ * \param input_path input image path
+ * \param row_shift row shift
+ * \param col_shift col shift
  */
-std::vector<double> ComputeResampledGeoTransform(GDALDataset* dataset,
-                                                 const ZoomRatio& zoom_ratio);
-
-/**
- * \brief Compute new origin according to translation paramaters
- * \param row_shift shift in pixels on x axis
- * \param col_shift shift in pixels on y axis
- * \return new geo transform
- */
-std::vector<double> ComputeShiftedGeoTransform(GDALDataset* dataset,
-                                               float row_shift,
-                                               float col_shift);
-
-GeoReference ComputeShiftedGeoReference(const std::string& input_path,
-                                        float row_shift, float col_shift);
+GeoReference ComputeTranslationGeoReference(const std::string& input_path,
+                                            float row_shift, float col_shift);
 
 }  // namespace gdal
 }  // namespace sirius
