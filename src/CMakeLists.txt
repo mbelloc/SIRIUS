@@ -73,15 +73,20 @@ set_target_properties(libsirius-static PROPERTIES
     PREFIX ""
     FOLDER "lib")
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    set_target_properties(libsirius-static PROPERTIES OUTPUT_NAME "libsirius_s")
+    set_target_properties(libsirius-static PROPERTIES
+         OUTPUT_NAME "libsirius_s")
 else()
-    set_target_properties(libsirius-static PROPERTIES OUTPUT_NAME "libsirius")
+    set_target_properties(libsirius-static PROPERTIES
+         OUTPUT_NAME "libsirius")
 endif()
 target_include_directories(libsirius-static PUBLIC
     $<TARGET_PROPERTY:libsirius,INTERFACE_INCLUDE_DIRECTORIES>)
-target_compile_definitions(libsirius-static PUBLIC $<TARGET_PROPERTY:libsirius,INTERFACE_COMPILE_DEFINITIONS>)
-target_compile_options(libsirius-static PUBLIC $<TARGET_PROPERTY:libsirius,INTERFACE_COMPILE_OPTIONS>)
-target_link_libraries(libsirius-static $<TARGET_PROPERTY:libsirius,INTERFACE_LINK_LIBRARIES>)
+target_compile_definitions(libsirius-static PUBLIC
+    $<TARGET_PROPERTY:libsirius,INTERFACE_COMPILE_DEFINITIONS>)
+target_compile_options(libsirius-static PUBLIC
+    $<TARGET_PROPERTY:libsirius,INTERFACE_COMPILE_OPTIONS>)
+target_link_libraries(libsirius-static
+    $<TARGET_PROPERTY:libsirius,INTERFACE_LINK_LIBRARIES>)
 
 # sirius objects library
 add_library(libsirius-objects OBJECT EXCLUDE_FROM_ALL
@@ -100,6 +105,10 @@ add_library(libsirius-objects OBJECT EXCLUDE_FROM_ALL
     sirius/frequency_resampler_factory.h
     sirius/frequency_resampler_factory.cc
 
+    sirius/i_frequency_translator.h
+    sirius/frequency_translator_factory.h
+    sirius/frequency_translator_factory.cc
+
     # image_decomposition
     sirius/image_decomposition/periodic_smooth_policy.h
     sirius/image_decomposition/periodic_smooth_policy.txx
@@ -117,6 +126,16 @@ add_library(libsirius-objects OBJECT EXCLUDE_FROM_ALL
     sirius/resampling/upsampling/periodization_upsampling.cc
     sirius/resampling/upsampling/zero_padding_upsampling.h
     sirius/resampling/upsampling/zero_padding_upsampling.cc
+
+    # translation
+    sirius/translation/frequency_translator.h
+    sirius/translation/interpolator.h
+    sirius/translation/interpolator.cc
+    sirius/translation/parameters.h
+    sirius/translation/processor.h
+    sirius/translation/processor.cc
+    sirius/translation/utils.h
+    sirius/translation/utils.cc
 
     # fftw
     sirius/fftw/exception.h
@@ -233,7 +252,13 @@ if (ENABLE_SIRIUS_EXECUTABLE OR BUILD_TESTING)
         sirius/gdal/resampling/input_stream.h
         sirius/gdal/resampling/input_stream.cc
         sirius/gdal/resampling/output_stream.h
-        sirius/gdal/resampling/output_stream.cc)
+        sirius/gdal/resampling/output_stream.cc
+
+        # gdal/translation
+        sirius/gdal/translation/input_stream.h
+        sirius/gdal/translation/input_stream.cc
+        sirius/gdal/translation/output_stream.h
+        sirius/gdal/translation/output_stream.cc)
     set_target_properties(libsirius-gdal-static PROPERTIES FOLDER lib)
     target_link_libraries(libsirius-gdal-static PUBLIC gdal libsirius-static)
 endif ()
